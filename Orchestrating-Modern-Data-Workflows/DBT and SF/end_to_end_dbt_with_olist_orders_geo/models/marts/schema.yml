@@ -1,0 +1,59 @@
+version: 2
+
+models:
+  - name: fact_orders
+    description: "Fact model order"
+    columns:
+      - name: order_purchase_year
+        description: "Year extracted from order_purchase_timestamp"
+        tests:
+          - not_null
+
+      - name: order_status
+        description: "Current status of the order"
+        tests:
+          - not_null
+
+
+  - name: fact_orders_geography
+    description: "Fact model combining order and customer geography details"
+    columns:
+      - name: order_purchase_year
+        description: "Year extracted from order_purchase_timestamp"
+        tests:
+          - not_null
+
+      - name: order_status
+        description: "Current status of the order"
+        tests:
+          - not_null
+
+      - name: customer_city
+        description: "Customer's city"
+        tests:
+          - not_null
+
+      - name: customer_state
+        description: "Customer's state"
+        tests:
+          - not_null
+
+
+  - name: fact_seller_performance
+    description: "Fact model depicting the performance of each seller"
+    columns:
+      - name: seller_id
+        description: "unique id of each seller"
+        tests:
+          - not_null
+          - unique
+
+      - name: total_sales_value
+        description: "Value of the total sales of each seller"
+        tests:
+          - not_null
+
+      - name: torder_count
+        description: "VNumber of totla orders"
+        tests:
+          - not_null

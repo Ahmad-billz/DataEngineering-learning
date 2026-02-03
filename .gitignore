@@ -3,3 +3,4 @@
 .*env
 data-processing/mastadon_ETL/data_clean/
 Orchestrating-Modern-Data-Workflows/*/logs/
+*target/

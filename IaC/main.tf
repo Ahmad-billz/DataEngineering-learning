@@ -53,21 +53,36 @@ output "bucket_name" {
 # }
 
 
-              ######## ======== iac-providers-resources ======== ########
+#               ######## ======== iac-providers-resources ======== ########
+# provider "aws" {
+#   region = "us-east-1"
+# }
+
+# # Base bucket
+# resource "aws_s3_bucket" "name" {
+#   bucket = "iac-demo-bucket-99887711"
+#   force_destroy = true
+# }
+
+# # File that depends on the bucket (fixed: aws_s3_object instead of aws_s3_bucket_object)
+# resource "aws_s3_object" "readme" {
+#   bucket  = aws_s3_bucket.name.bucket  # use .bucket for name
+#   key     = "README.txt"               # object name in S3
+#   content = "This file was provisioned by Terraform"
+# }
+
+
+              ######## ======== terraform_state ======== ########
+
 provider "aws" {
   region = "us-east-1"
 }
 
-# Base bucket
-resource "aws_s3_bucket" "name" {
-  bucket = "iac-demo-bucket-99887711"
-  force_destroy = true
-}
+resource "aws_s3_bucket" "demo" {
+  bucket = "iac-state-bucket-11122112299887788"
 
-# File that depends on the bucket (fixed: aws_s3_object instead of aws_s3_bucket_object)
-resource "aws_s3_object" "readme" {
-  bucket  = aws_s3_bucket.name.bucket  # use .bucket for name
-  key     = "README.txt"               # object name in S3
-  content = "This file was provisioned by Terraform"
+  tags = {
+    Name = "iac-demo"
+    Env  = "dev"
+  }
 }
-

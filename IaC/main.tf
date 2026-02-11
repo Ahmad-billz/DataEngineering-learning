@@ -89,7 +89,38 @@ output "bucket_name" {
 
 
 
-          ######## ======== terraform variable & outputs ======== ########
+#           ######## ======== terraform variable & outputs ======== ########
+# terraform {
+#   required_providers {
+#     aws    = { source = "hashicorp/aws" }
+#     random = { source = "hashicorp/random" }
+#   }
+# }
+
+# provider "aws" {
+#   region = var.aws_region
+# }
+
+# # generate short random suffix to avoid collisions in examples
+# resource "random_id" "suffix" {
+#   byte_length = 4
+# }
+
+# # S3 bucket resource (do NOT use ACLs)
+# resource "aws_s3_bucket" "demo" {
+#   bucket = "${var.bucket_name}-${random_id.suffix.hex}"
+
+#   tags = {
+#     Name = var.bucket_name
+#     Env  = terraform.workspace
+#   }
+
+#   # optional: allow destroying non-empty buckets during destroy (use carefully)
+#   force_destroy = true
+# }
+
+
+          ######## ======== ex1 ======== ########
 terraform {
   required_providers {
     aws    = { source = "hashicorp/aws" }
@@ -98,23 +129,21 @@ terraform {
 }
 
 provider "aws" {
-  region = var.aws_region
+  region = "us-east-1"
 }
 
-# generate short random suffix to avoid collisions in examples
 resource "random_id" "suffix" {
   byte_length = 4
 }
 
-# S3 bucket resource (do NOT use ACLs)
-resource "aws_s3_bucket" "demo" {
-  bucket = "${var.bucket_name}-${random_id.suffix.hex}"
-
+resource "aws_s3_bucket" "validated" {
+  bucket = "${var.bucket_prefix}-${random_id.suffix.hex}"
   tags = {
-    Name = var.bucket_name
-    Env  = terraform.workspace
+    Name = var.bucket_prefix
+    Env  = "dev"
   }
+}
 
-  # optional: allow destroying non-empty buckets during destroy (use carefully)
-  force_destroy = true
+output "bucket_name" {
+  value = aws_s3_bucket.validated.bucket
 }

@@ -275,27 +275,44 @@ output "bucket_name" {
 
 
             ######## ======== ex6 ======== ########
+# terraform {
+#   required_providers {
+#     aws    = { source = "hashicorp/aws" }
+#     random = { source = "hashicorp/random" }
+#   }
+# }
+# provider "aws" { region = "us-east-1" }
+
+# data "aws_caller_identity" "current" {}
+
+# resource "random_id" "sfx" { byte_length = 2 }
+
+# locals {
+#   acct_id = data.aws_caller_identity.current.account_id
+#   last4   = substr(local.acct_id, length(local.acct_id) - 4, 4)
+# }
+
+# resource "aws_s3_bucket" "acct_bucket" {
+#   bucket = "iac-${local.last4}-${random_id.sfx.hex}"
+#   tags = { Account = local.acct_id }
+# }
+
+# output "aws_account_id" { value = data.aws_caller_identity.current.account_id }
+# output "bucket_name" { value = aws_s3_bucket.acct_bucket.bucket }
+
+
+
+            ######## ======== ex7 ======== ########
 terraform {
   required_providers {
-    aws    = { source = "hashicorp/aws" }
-    random = { source = "hashicorp/random" }
+    aws = { source = "hashicorp/aws" }
   }
 }
 provider "aws" { region = "us-east-1" }
 
-data "aws_caller_identity" "current" {}
-
-resource "random_id" "sfx" { byte_length = 2 }
-
-locals {
-  acct_id = data.aws_caller_identity.current.account_id
-  last4   = substr(local.acct_id, length(local.acct_id) - 4, 4)
+resource "aws_s3_bucket" "imported" {
+  bucket = "iac-manual-import-REPLACE_WITH_SUFFIX"
+  tags = { ManagedBy = "terraform-import-exercise" }
 }
 
-resource "aws_s3_bucket" "acct_bucket" {
-  bucket = "iac-${local.last4}-${random_id.sfx.hex}"
-  tags = { Account = local.acct_id }
-}
-
-output "aws_account_id" { value = data.aws_caller_identity.current.account_id }
-output "bucket_name" { value = aws_s3_bucket.acct_bucket.bucket }
+output "bucket_name" { value = aws_s3_bucket.imported.bucket }

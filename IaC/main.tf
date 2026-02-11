@@ -121,6 +121,35 @@ output "bucket_name" {
 
 
           ######## ======== ex1 ======== ########
+# terraform {
+#   required_providers {
+#     aws    = { source = "hashicorp/aws" }
+#     random = { source = "hashicorp/random" }
+#   }
+# }
+
+# provider "aws" {
+#   region = "us-east-1"
+# }
+
+# resource "random_id" "suffix" {
+#   byte_length = 4
+# }
+
+# resource "aws_s3_bucket" "validated" {
+#   bucket = "${var.bucket_prefix}-${random_id.suffix.hex}"
+#   tags = {
+#     Name = var.bucket_prefix
+#     Env  = "dev"
+#   }
+# }
+
+# output "bucket_name" {
+#   value = aws_s3_bucket.validated.bucket
+# }
+
+
+#           ######## ======== ex2 ======== ########
 terraform {
   required_providers {
     aws    = { source = "hashicorp/aws" }
@@ -128,22 +157,22 @@ terraform {
   }
 }
 
-provider "aws" {
-  region = "us-east-1"
-}
+provider "aws" { region = "us-east-1" }
 
 resource "random_id" "suffix" {
+  count       = var.count_buckets
   byte_length = 4
 }
 
-resource "aws_s3_bucket" "validated" {
-  bucket = "${var.bucket_prefix}-${random_id.suffix.hex}"
+resource "aws_s3_bucket" "multi" {
+  count  = var.count_buckets
+  bucket = "${var.bucket_prefix}-${random_id.suffix[count.index].hex}"
   tags = {
-    Name = var.bucket_prefix
-    Env  = "dev"
+    Name  = var.bucket_prefix
+    Index = tostring(count.index)
   }
 }
 
-output "bucket_name" {
-  value = aws_s3_bucket.validated.bucket
+output "bucket_names" {
+  value = aws_s3_bucket.multi[*].bucket
 }

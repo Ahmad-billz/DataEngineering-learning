@@ -178,35 +178,54 @@ output "bucket_name" {
 # }
 
 
-            ######## ======== ex3 ======== ########
+#             ######## ======== ex3 ======== ########
+# terraform {
+#   required_providers {
+#     aws    = { source = "hashicorp/aws" }
+#     local  = { source = "hashicorp/local" }
+#     random = { source = "hashicorp/random" }
+#   }
+# }
+
+# provider "aws" { region = "us-east-1" }
+# provider "local" {}
+
+# resource "random_id" "suffix" { byte_length = 4 }
+
+# resource "aws_s3_bucket" "demo" {
+#   bucket = "iac-localfile-${random_id.suffix.hex}"
+
+#   tags = {
+#     Name = "iac-localfile"
+#     Env  = "dev"
+#   }
+# }
+
+# resource "local_file" "bucket_info" {
+#   filename = "bucket-info.txt"
+#   content  = <<EOT
+# Bucket name: ${aws_s3_bucket.demo.bucket}
+# Bucket ARN:  ${aws_s3_bucket.demo.arn}
+# EOT
+# }
+
+# output "created_file" { value = local_file.bucket_info.filename }
+
+
+            ######## ======== ex4 ======== ########
 terraform {
   required_providers {
     aws    = { source = "hashicorp/aws" }
-    local  = { source = "hashicorp/local" }
     random = { source = "hashicorp/random" }
   }
 }
-
 provider "aws" { region = "us-east-1" }
-provider "local" {}
 
-resource "random_id" "suffix" { byte_length = 4 }
+resource "random_id" "suf" { byte_length = 4 }
 
-resource "aws_s3_bucket" "demo" {
-  bucket = "iac-localfile-${random_id.suffix.hex}"
-
-  tags = {
-    Name = "iac-localfile"
-    Env  = "dev"
-  }
+resource "aws_s3_bucket" "original_bucket" {
+  bucket = "iac-state-sample25-${random_id.suf.hex}"
+  tags = { Name = "iac-state-sample" }
 }
 
-resource "local_file" "bucket_info" {
-  filename = "bucket-info.txt"
-  content  = <<EOT
-Bucket name: ${aws_s3_bucket.demo.bucket}
-Bucket ARN:  ${aws_s3_bucket.demo.arn}
-EOT
-}
-
-output "created_file" { value = local_file.bucket_info.filename }
+output "bucket_name" { value = aws_s3_bucket.original_bucket.bucket }

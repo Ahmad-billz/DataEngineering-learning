@@ -212,20 +212,63 @@ output "bucket_name" {
 # output "created_file" { value = local_file.bucket_info.filename }
 
 
+#             ######## ======== ex4 ======== ########
+# terraform {
+#   required_providers {
+#     aws    = { source = "hashicorp/aws" }
+#     random = { source = "hashicorp/random" }
+#   }
+# }
+# provider "aws" { region = "us-east-1" }
+
+# resource "random_id" "suf" { byte_length = 4 }
+
+# resource "aws_s3_bucket" "original_bucket" {
+#   bucket = "iac-state-sample25-${random_id.suf.hex}"
+#   tags = { Name = "iac-state-sample" }
+# }
+
+# output "bucket_name" { value = aws_s3_bucket.original_bucket.bucket }
+
+
+
             ######## ======== ex4 ======== ########
 terraform {
   required_providers {
-    aws    = { source = "hashicorp/aws" }
+    aws   = { source = "hashicorp/aws" }
+    local = { source = "hashicorp/local" }
     random = { source = "hashicorp/random" }
   }
 }
 provider "aws" { region = "us-east-1" }
+provider "local" {}
 
-resource "random_id" "suf" { byte_length = 4 }
-
-resource "aws_s3_bucket" "original_bucket" {
-  bucket = "iac-state-sample25-${random_id.suf.hex}"
-  tags = { Name = "iac-state-sample" }
+resource "random_id" "suf" {
+  count       = 2
+  byte_length = 4
 }
 
-output "bucket_name" { value = aws_s3_bucket.original_bucket.bucket }
+resource "aws_s3_bucket" "backup" {
+  bucket = "iac-backup-${random_id.suf[0].hex}"
+  tags = { Name = "backup" }
+}
+
+resource "aws_s3_bucket" "archive" {
+  bucket = "iac-archive-${random_id.suf[1].hex}"
+  tags = { Name = "archive" }
+}
+
+output "bucket_arns_map" {
+  value = {
+    backup  = aws_s3_bucket.backup.arn
+    archive = aws_s3_bucket.archive.arn
+  }
+}
+
+resource "local_file" "buckets_json" {
+  filename = "buckets.json"
+  content  = jsonencode({
+    backup  = aws_s3_bucket.backup.arn
+    archive = aws_s3_bucket.archive.arn
+  })
+}

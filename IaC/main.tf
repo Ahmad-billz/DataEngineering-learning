@@ -339,5 +339,19 @@ output "bucket_name" {
 
 
 
-            ######## ======== ex8 ======== ########
+            ######## ======== ex9 ======== ########
+terraform {
+  required_providers {
+    aws    = { source = "hashicorp/aws" }
+    random = { source = "hashicorp/random" }
+  }
+}
+provider "aws" { region = "us-east-1" }
 
+resource "random_id" "s" { byte_length = 4 }
+
+resource "aws_s3_bucket" "recreate" {
+  bucket = "iac-taint-${random_id.s.hex}"
+  tags = { Name = "iac-taint-demo" }
+}
+output "bucket_name" { value = aws_s3_bucket.recreate.bucket }

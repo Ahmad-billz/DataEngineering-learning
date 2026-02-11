@@ -72,17 +72,49 @@ output "bucket_name" {
 # }
 
 
-              ######## ======== terraform_state ======== ########
+#               ######## ======== terraform_state ======== ########
 
-provider "aws" {
-  region = "us-east-1"
+# provider "aws" {
+#   region = "us-east-1"
+# }
+
+# resource "aws_s3_bucket" "demo" {
+#   bucket = "iac-state-bucket-11122112299887788"
+
+#   tags = {
+#     Name = "iac-demo"
+#     Env  = "dev"
+#   }
+# }
+
+
+
+          ######## ======== terraform variable & outputs ======== ########
+terraform {
+  required_providers {
+    aws    = { source = "hashicorp/aws" }
+    random = { source = "hashicorp/random" }
+  }
 }
 
+provider "aws" {
+  region = var.aws_region
+}
+
+# generate short random suffix to avoid collisions in examples
+resource "random_id" "suffix" {
+  byte_length = 4
+}
+
+# S3 bucket resource (do NOT use ACLs)
 resource "aws_s3_bucket" "demo" {
-  bucket = "iac-state-bucket-11122112299887788"
+  bucket = "${var.bucket_name}-${random_id.suffix.hex}"
 
   tags = {
-    Name = "iac-demo"
-    Env  = "dev"
+    Name = var.bucket_name
+    Env  = terraform.workspace
   }
+
+  # optional: allow destroying non-empty buckets during destroy (use carefully)
+  force_destroy = true
 }

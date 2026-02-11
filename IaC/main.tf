@@ -35,20 +35,39 @@ output "bucket_name" {
  */
 
 
-             ######## ======== iac-providers-resources ======== ########
-terraform {
-  required_providers {
-    local = {
-      source  = "hashicorp/local"
-      version = "~> 2.0"
-    }
-  }
+#              ######## ======== iac-providers-resources ======== ########
+# terraform {
+#   required_providers {
+#     local = {
+#       source  = "hashicorp/local"
+#       version = "~> 2.0"
+#     }
+#   }
+# }
+
+# provider "local" {}
+
+# resource "local_file" "demo" {
+#   content  = "Hello from Terraform"
+#   filename = "hello.txt"
+# }
+
+
+              ######## ======== iac-providers-resources ======== ########
+provider "aws" {
+  region = "us-east-1"
 }
 
-provider "local" {}
+# Base bucket
+resource "aws_s3_bucket" "name" {
+  bucket = "iac-demo-bucket-99887711"
+  force_destroy = true
+}
 
-resource "local_file" "demo" {
-  content  = "Hello from Terraform"
-  filename = "hello.txt"
+# File that depends on the bucket (fixed: aws_s3_object instead of aws_s3_bucket_object)
+resource "aws_s3_object" "readme" {
+  bucket  = aws_s3_bucket.name.bucket  # use .bucket for name
+  key     = "README.txt"               # object name in S3
+  content = "This file was provisioned by Terraform"
 }
 

@@ -319,20 +319,25 @@ output "bucket_name" {
 
 
 
+#             ######## ======== ex8 ======== ########
+# terraform {
+#   required_providers {
+#     aws    = { source = "hashicorp/aws" }
+#     random = { source = "hashicorp/random" }
+#   }
+# }
+# provider "aws" { region = "us-east-1" }
+
+# resource "random_id" "s" { byte_length = 4 }
+
+# resource "aws_s3_bucket" "protected" {
+#   bucket = "iac-protected-${random_id.s.hex}"
+#   tags = { Name = "iac-protected" }
+#   lifecycle { prevent_destroy = true }
+# }
+# output "bucket_name" { value = aws_s3_bucket.protected.bucket }
+
+
+
             ######## ======== ex8 ======== ########
-terraform {
-  required_providers {
-    aws    = { source = "hashicorp/aws" }
-    random = { source = "hashicorp/random" }
-  }
-}
-provider "aws" { region = "us-east-1" }
 
-resource "random_id" "s" { byte_length = 4 }
-
-resource "aws_s3_bucket" "protected" {
-  bucket = "iac-protected-${random_id.s.hex}"
-  tags = { Name = "iac-protected" }
-  lifecycle { prevent_destroy = true }
-}
-output "bucket_name" { value = aws_s3_bucket.protected.bucket }

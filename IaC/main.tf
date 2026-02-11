@@ -232,43 +232,70 @@ output "bucket_name" {
 
 
 
-            ######## ======== ex4 ======== ########
+#             ######## ======== ex5 ======== ########
+# terraform {
+#   required_providers {
+#     aws   = { source = "hashicorp/aws" }
+#     local = { source = "hashicorp/local" }
+#     random = { source = "hashicorp/random" }
+#   }
+# }
+# provider "aws" { region = "us-east-1" }
+# provider "local" {}
+
+# resource "random_id" "suf" {
+#   count       = 2
+#   byte_length = 4
+# }
+
+# resource "aws_s3_bucket" "backup" {
+#   bucket = "iac-backup-${random_id.suf[0].hex}"
+#   tags = { Name = "backup" }
+# }
+
+# resource "aws_s3_bucket" "archive" {
+#   bucket = "iac-archive-${random_id.suf[1].hex}"
+#   tags = { Name = "archive" }
+# }
+
+# output "bucket_arns_map" {
+#   value = {
+#     backup  = aws_s3_bucket.backup.arn
+#     archive = aws_s3_bucket.archive.arn
+#   }
+# }
+
+# resource "local_file" "buckets_json" {
+#   filename = "buckets.json"
+#   content  = jsonencode({
+#     backup  = aws_s3_bucket.backup.arn
+#     archive = aws_s3_bucket.archive.arn
+#   })
+# }
+
+
+            ######## ======== ex6 ======== ########
 terraform {
   required_providers {
-    aws   = { source = "hashicorp/aws" }
-    local = { source = "hashicorp/local" }
+    aws    = { source = "hashicorp/aws" }
     random = { source = "hashicorp/random" }
   }
 }
 provider "aws" { region = "us-east-1" }
-provider "local" {}
 
-resource "random_id" "suf" {
-  count       = 2
-  byte_length = 4
+data "aws_caller_identity" "current" {}
+
+resource "random_id" "sfx" { byte_length = 2 }
+
+locals {
+  acct_id = data.aws_caller_identity.current.account_id
+  last4   = substr(local.acct_id, length(local.acct_id) - 4, 4)
 }
 
-resource "aws_s3_bucket" "backup" {
-  bucket = "iac-backup-${random_id.suf[0].hex}"
-  tags = { Name = "backup" }
+resource "aws_s3_bucket" "acct_bucket" {
+  bucket = "iac-${local.last4}-${random_id.sfx.hex}"
+  tags = { Account = local.acct_id }
 }
 
-resource "aws_s3_bucket" "archive" {
-  bucket = "iac-archive-${random_id.suf[1].hex}"
-  tags = { Name = "archive" }
-}
-
-output "bucket_arns_map" {
-  value = {
-    backup  = aws_s3_bucket.backup.arn
-    archive = aws_s3_bucket.archive.arn
-  }
-}
-
-resource "local_file" "buckets_json" {
-  filename = "buckets.json"
-  content  = jsonencode({
-    backup  = aws_s3_bucket.backup.arn
-    archive = aws_s3_bucket.archive.arn
-  })
-}
+output "aws_account_id" { value = data.aws_caller_identity.current.account_id }
+output "bucket_name" { value = aws_s3_bucket.acct_bucket.bucket }

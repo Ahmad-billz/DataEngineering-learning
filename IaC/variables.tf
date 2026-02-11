@@ -10,17 +10,19 @@
 #   }
 # }
 
-#           ######## ======== ex2 ======== ########
-variable "bucket_prefix" {
-  type    = string
-  default = "iac-multi"
-}
+#            ######## ======== ex2 ======== ########
+# variable "bucket_prefix" {
+#   type    = string
+#   default = "iac-multi"
+# }
 
-variable "count_buckets" {
-  type    = number
-  default = 2
-  validation {
-    condition     = var.count_buckets >= 1 && var.count_buckets <= 5
-    error_message = "count_buckets must be between 1 and 5."
-  }
-}
+# variable "count_buckets" {
+#   type    = number
+#   default = 2
+#   validation {
+#     condition     = var.count_buckets >= 1 && var.count_buckets <= 5
+#     error_message = "count_buckets must be between 1 and 5."
+#   }
+# }
+
+            ######## ======== ex3 ======== ########

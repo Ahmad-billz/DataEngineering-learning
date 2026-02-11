@@ -149,30 +149,64 @@ output "bucket_name" {
 # }
 
 
-#           ######## ======== ex2 ======== ########
+# #           ######## ======== ex2 ======== ########
+# terraform {
+#   required_providers {
+#     aws    = { source = "hashicorp/aws" }
+#     random = { source = "hashicorp/random" }
+#   }
+# }
+
+# provider "aws" { region = "us-east-1" }
+
+# resource "random_id" "suffix" {
+#   count       = var.count_buckets
+#   byte_length = 4
+# }
+
+# resource "aws_s3_bucket" "multi" {
+#   count  = var.count_buckets
+#   bucket = "${var.bucket_prefix}-${random_id.suffix[count.index].hex}"
+#   tags = {
+#     Name  = var.bucket_prefix
+#     Index = tostring(count.index)
+#   }
+# }
+
+# output "bucket_names" {
+#   value = aws_s3_bucket.multi[*].bucket
+# }
+
+
+            ######## ======== ex3 ======== ########
 terraform {
   required_providers {
     aws    = { source = "hashicorp/aws" }
+    local  = { source = "hashicorp/local" }
     random = { source = "hashicorp/random" }
   }
 }
 
 provider "aws" { region = "us-east-1" }
+provider "local" {}
 
-resource "random_id" "suffix" {
-  count       = var.count_buckets
-  byte_length = 4
-}
+resource "random_id" "suffix" { byte_length = 4 }
 
-resource "aws_s3_bucket" "multi" {
-  count  = var.count_buckets
-  bucket = "${var.bucket_prefix}-${random_id.suffix[count.index].hex}"
+resource "aws_s3_bucket" "demo" {
+  bucket = "iac-localfile-${random_id.suffix.hex}"
+
   tags = {
-    Name  = var.bucket_prefix
-    Index = tostring(count.index)
+    Name = "iac-localfile"
+    Env  = "dev"
   }
 }
 
-output "bucket_names" {
-  value = aws_s3_bucket.multi[*].bucket
+resource "local_file" "bucket_info" {
+  filename = "bucket-info.txt"
+  content  = <<EOT
+Bucket name: ${aws_s3_bucket.demo.bucket}
+Bucket ARN:  ${aws_s3_bucket.demo.arn}
+EOT
 }
+
+output "created_file" { value = local_file.bucket_info.filename }

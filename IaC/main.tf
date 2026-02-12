@@ -339,19 +339,38 @@ output "bucket_name" {
 
 
 
-            ######## ======== ex9 ======== ########
-terraform {
-  required_providers {
-    aws    = { source = "hashicorp/aws" }
-    random = { source = "hashicorp/random" }
+#             ######## ======== ex9 ======== ########
+# terraform {
+#   required_providers {
+#     aws    = { source = "hashicorp/aws" }
+#     random = { source = "hashicorp/random" }
+#   }
+# }
+# provider "aws" { region = "us-east-1" }
+
+# resource "random_id" "s" { byte_length = 4 }
+
+# resource "aws_s3_bucket" "recreate" {
+#   bucket = "iac-taint-${random_id.s.hex}"
+#   tags = { Name = "iac-taint-demo" }
+# }
+# output "bucket_name" { value = aws_s3_bucket.recreate.bucket }
+
+
+provider "aws" {
+  region = "us-east-1"
+}
+
+module "mybucket" {
+  source      = "./modules/s3_bucket"
+  bucket_name = "terraform-module-bucket-2991" # CHANGE to a globally unique name
+  # acl removed — we won't manage ACLs (preferred)
+  tags = {
+    owner = "you"
+    env   = "dev"
   }
 }
-provider "aws" { region = "us-east-1" }
 
-resource "random_id" "s" { byte_length = 4 }
-
-resource "aws_s3_bucket" "recreate" {
-  bucket = "iac-taint-${random_id.s.hex}"
-  tags = { Name = "iac-taint-demo" }
+output "bucket_id" {
+  value = module.mybucket.bucket_id
 }
-output "bucket_name" { value = aws_s3_bucket.recreate.bucket }

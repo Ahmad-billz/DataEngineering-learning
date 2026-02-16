@@ -1,0 +1,49 @@
+version: '3.8'
+
+services:
+   postgres:
+      image: postgres:15
+      container_name: postgres
+      ports:
+         - "5432:5432"
+      environment:
+         POSTGRES_USER: root
+         POSTGRES_PASSWORD: rootpassword
+         POSTGRES_DB: governance_db
+      healthcheck:
+         test: ["CMD-SHELL", "pg_isready -U root"]
+         interval: 5s
+         timeout: 3s
+         retries: 5
+      networks:
+         - governance-network
+
+   pgadmin:
+      image: dpage/pgadmin4:8
+      container_name: pgadmin
+      depends_on:
+         postgres:
+            condition: service_healthy
+      environment:
+         PGADMIN_DEFAULT_EMAIL: admin@admin.com
+         PGADMIN_DEFAULT_PASSWORD: admin
+      ports:
+         - "8080:80"
+      networks:
+         - governance-network
+
+   spark-jupyter:
+      image: jupyter/pyspark-notebook:latest
+      container_name: spark-jupyter
+      environment:
+         GRANT_SUDO: "yes"
+         JUPYTER_TOKEN: ""
+      command: ["start-notebook.sh", "--NotebookApp.token=", "--NotebookApp.password=", "--NotebookApp.password_required=False"]
+      ports:
+         - "8888:8888"
+      networks:
+         - governance-network
+
+networks:
+   governance-network:
+      name: governance-network

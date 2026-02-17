@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mini-api
+  namespace: mini-project
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mini-api
+  template:
+    metadata:
+      labels:
+        app: mini-api
+    spec:
+      containers:
+      - name: mini-api
+        image: mini-project-api:latest   # will load to minikube (see build steps)
+        imagePullPolicy: IfNotPresent
+        env:
+          - name: DB_HOST
+            value: "postgres"
+          - name: DB_PORT
+            value: "5432"
+          - name: DB_NAME
+            value: "exampledb"
+          - name: DB_USER
+            value: "example"
+          - name: DB_PASS
+            valueFrom:
+              secretKeyRef:
+                name: pg-secret
+                key: password
+        ports:
+          - containerPort: 5000

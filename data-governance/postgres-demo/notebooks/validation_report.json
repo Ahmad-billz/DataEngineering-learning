@@ -1,0 +1,7 @@
+{
+  "expectation": "No nulls in age",
+  "success": false,
+  "unexpected_count": 1,
+  "total_count": 4,
+  "unexpected_percent": 25.0
+}
